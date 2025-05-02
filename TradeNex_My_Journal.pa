@@ -1,0 +1,56 @@
+from telegram import Update
+from telegram.ext import ApplicationBuilder, MessageHandler, ContextTypes, filters
+
+# Emoji dictionary
+emoji_map = {
+    "red_circle": "🔴",
+    "blue_circle": "🔵",
+    "green_circle": "🟢",
+    "black_circle": "⚫️",
+    "warning": "⚠️",
+    "exclamation": "❗️",
+    "cross_mark": "❌",
+    "check_mark": "✅",
+    "black_large_square": "⬛️",
+    "bell": "🔔",
+    "speech_balloon": "💬",
+    "chart_increasing": "📈",
+    "bar_chart": "📊"
+}
+
+# Function to replace keywords with emojis
+def replace_keywords_with_emoji(text):
+    for key, emoji in emoji_map.items():
+        text = text.replace(key, emoji)
+    return text
+
+# Function to handle messages
+async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    # Check if the message is text
+    if update.message and update.message.text:
+        original_text = update.message.text
+
+        # Only proceed if a keyword is in the message
+        if not any(key in original_text for key in emoji_map):
+            return
+
+        # Replace keywords with emojis
+        modified_text = replace_keywords_with_emoji(original_text)
+
+        # Try to delete the original message
+        try:
+            await update.message.delete()
+        except Exception as e:
+            print(f"Error deleting message: {e}")
+
+        # Send the modified message with emojis
+        await update.message.chat.send_message(modified_text)
+
+# Insert your bot's token here
+app = ApplicationBuilder().token("6500328078:AAHAx0aE-5p0ztVEemqrswT2FQ8OrwaAHx4").build()
+
+# Add the message handler
+app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+
+print("Bot is running...")
+app.run_polling()
