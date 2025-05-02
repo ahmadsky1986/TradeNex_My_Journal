@@ -1,1 +1,1 @@
-python emoji_bot.py
+python main.py
